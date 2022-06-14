@@ -25,3 +25,8 @@
 npm-debug.log
 yarn-error.log
 ###< symfony/webpack-encore-bundle ###
+
+
+###>  ###
+bankAccountTest.session.sql
+###<  ###
