@@ -67,8 +67,9 @@ Class UserService{
         return ['currentBamance' => $newBalance, 'debitedAmount' => $debitedAmount]; 
     }
     
-    public function account(){
-        
+    public function account($userId){
+        $user = $this->userRepository->find($userId);
+        return $user->getAccount()->getBalance();
     }
 
     public function notif(){

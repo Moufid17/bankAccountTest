@@ -5,30 +5,40 @@ namespace App\Controller;
 use App\Services\UserService;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class UserController extends AbstractController
 {
-    private $userService;
+    private UserService $userService;
     public function __construct(UserService $userService) {
         $this->userService = $userService;
     }
 
     #[Route('/users/{user}/accounts', name: 'app_user')]
-    public function index(): Response
+    public function index(Request $request): JsonResponse
     {
-        return $this->render('user/index.html.twig', [       
+        $response = $this->userService->account(1);
+/*        return $this->render('user/index.html.twig', [
+            'response' => $response,
+            'request' => $request
+        ]);*/
+        return $this->json([
+            'response' => $response,
+            'request' => $request
         ]);
     }
 
-    #[Route('/users/{user}/accounts/credit/{amount}', name: 'app_user_credit')]
-    public function credit($user, $amount): Response
+    #[Route('/users/{user}/accounts/credit', name: 'app_user_credit')]
+    public function credit($user, Request $request): JsonResponse
     {
-        $response = $this->userService->credit($user, $amount);
-        return $this->render('user/index.html.twig', [
-            'controller_name' => 'UserController',
-            'response' => $response
+        $jsonRequest = json_decode($request->getContent(), true);
+        $response = $this->userService->credit($user, $jsonRequest["amount"]);
+        return $this->json([
+            'response' => $response,
+            'request' => $jsonRequest
         ]);
     }
 
