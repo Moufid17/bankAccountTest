@@ -4,7 +4,7 @@ namespace App\Services;
 use App\Entity\BankAccount;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-// use Carbon\Carbon;
+use \Carbon\Carbon;
 
 Class UserService{
 
@@ -72,6 +72,6 @@ Class UserService{
     }
 
     public function notif(){
-        // $currentDate = Carbon::now();   
+        $currentDate = Carbon::now();   
     }
 }
