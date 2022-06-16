@@ -19,10 +19,10 @@ class UserController extends AbstractController
     }
 
     #[Route('/users/{user}/accounts', name: 'app_user', methods: ['GET'])]
-    public function index($userId, Request $request): JsonResponse
+    public function index($user): JsonResponse
     {
         return $this->json([
-            'response' => $this->userService->account($userId),
+            'response' => $this->userService->account($user),
         ]);
     }
 
@@ -50,15 +50,6 @@ class UserController extends AbstractController
         
         return $this->json([
             'response' => $response,
-        ]);
-    }
-
-    #[Route('/users/accounts/notif', name: 'app_user_notif', methods: ['GET'])]
-    public function notif(): JsonResponse
-    {
-        
-        return $this->json([
-            'response' => $this->userService->notif(),
         ]);
     }
 }

@@ -4,19 +4,23 @@ namespace App\Services;
 use App\Entity\BankAccount;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use \Carbon\Carbon;
+use Carbon\Carbon;
+use App\ExternalServices\EmailSenderService;
 
 Class UserService{
 
     private $userRepository;
     private $em;
+    private $externalService;
 
-    public function __construct(UserRepository $userRepository, EntityManagerInterface $em) {
+    public function __construct(UserRepository $userRepository, EntityManagerInterface $em, EmailSenderService $externalService) {
         $this->userRepository = $userRepository;
         $this->em = $em;
+        $this->externalService = $externalService;
     }
 
     public function credit($userId, int $amount){
+        
         $user = $this->userRepository->find($userId); 
         $userAccount = $user->getAccount();
         
@@ -38,6 +42,12 @@ Class UserService{
 
         $userAccount->setBalance($newBalance);
         $this->em->flush();
+        # Notify user 
+        $currentHour = Carbon::now('Europe/Paris')->hour;
+        if($currentHour >= 22 || $currentHour <= 6){
+
+        }
+        $this->notif();
         return ['currentBalance'=> $newBalance, 'addedAmount' => $amountAdd];
     }
 
@@ -51,7 +61,8 @@ Class UserService{
             $userAccount->setOwner($user);
             $this->em->persist($user);
             $this->em->flush();
-            return ['currentBalance'=> 0, 'addedAmount' => 0];
+            $this->notif();
+            return ['currentBalance'=> 0, 'debitedAmmount' => 0];
         }
         
         $newBalance = $userAccount->getBalance() - $amount;
@@ -64,17 +75,23 @@ Class UserService{
         }
         $userAccount->setBalance($newBalance);
         $this->em->flush();
-        return ['currentBamance' => $newBalance, 'debitedAmount' => $debitedAmount]; 
+        $this->notif();
+        return ['currentBalance' => $newBalance, 'debitedAmount' => $debitedAmount]; 
     }
     
     public function account($userId){
         $user = $this->userRepository->find($userId);
-        return $user->getAccount()->getBalance();
+        return ['Balance' => $user->getAccount()->getBalance()];
     }
 
-    public function notif(){
-        
-        $currentHour = Carbon::now('Europe/Paris')->locale('fr')->hour;   
-        return $currentHour;
+    private function notif() {
+        $currentDate = Carbon::now('Europe/Paris'); 
+        if($currentDate->hour >= 22 || $currentDate->hour <= 6){
+            $message = `Vous aviez effectuer une opération de ? d'un montant de ? à `;
+            $this->externalService->sendEmail($message);
+            return true;
+        }
+        return false;
     }
+
 }
