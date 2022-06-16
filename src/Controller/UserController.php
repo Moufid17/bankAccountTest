@@ -13,42 +13,52 @@ use Symfony\Component\Routing\Annotation\Route;
 class UserController extends AbstractController
 {
     private UserService $userService;
+
     public function __construct(UserService $userService) {
         $this->userService = $userService;
     }
 
-    #[Route('/users/{user}/accounts', name: 'app_user')]
-    public function index(Request $request): JsonResponse
+    #[Route('/users/{user}/accounts', name: 'app_user', methods: ['GET'])]
+    public function index($userId, Request $request): JsonResponse
     {
-        $response = $this->userService->account(1);
-/*        return $this->render('user/index.html.twig', [
-            'response' => $response,
-            'request' => $request
-        ]);*/
         return $this->json([
-            'response' => $response,
-            'request' => $request
+            'response' => $this->userService->account($userId),
         ]);
     }
 
-    #[Route('/users/{user}/accounts/credit', name: 'app_user_credit')]
+    #[Route('/users/{user}/accounts/credit', name: 'app_user_credit', methods: ['PUT'])]
     public function credit($user, Request $request): JsonResponse
-    {
+    {   
+        # Request Body content
         $jsonRequest = json_decode($request->getContent(), true);
+
+        # Account data response.
         $response = $this->userService->credit($user, $jsonRequest["amount"]);
+
         return $this->json([
             'response' => $response,
-            'request' => $jsonRequest
         ]);
     }
 
-    #[Route('/users/{user}/accounts/debit/{amount}', name: 'app_user_debit')]
-    public function debit($user, $amount): Response
+    #[Route('/users/{user}/accounts/debit', name: 'app_user_debit', methods: ['PUT'])]
+    public function debit($user, Request $request): Response
     {
-        $response = $this->userService->debit($user, $amount);
-        return $this->render('user/index.html.twig', [
-            'controller_name' => 'UserController',
-            'response' => $response
+        # Request Body content
+        $jsonRequest = json_decode($request->getContent(), true);
+        # Account data response.
+        $response = $this->userService->debit($user, $jsonRequest["amount"]);
+        
+        return $this->json([
+            'response' => $response,
+        ]);
+    }
+
+    #[Route('/users/accounts/notif', name: 'app_user_notif', methods: ['GET'])]
+    public function notif(): JsonResponse
+    {
+        
+        return $this->json([
+            'response' => $this->userService->notif(),
         ]);
     }
 }

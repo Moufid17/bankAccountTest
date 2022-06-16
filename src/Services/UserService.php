@@ -73,6 +73,8 @@ Class UserService{
     }
 
     public function notif(){
-        $currentDate = Carbon::now();   
+        
+        $currentHour = Carbon::now('Europe/Paris')->locale('fr')->hour;   
+        return $currentHour;
     }
 }
